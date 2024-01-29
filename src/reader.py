@@ -1,8 +1,9 @@
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
 import pyomo.environ as p
 from pyomo.environ import *
-import pandas as pd
-from pathlib import Path
-import numpy as np
 
 
 def four_kp_model(filename):
@@ -10,9 +11,9 @@ def four_kp_model(filename):
 
     # Define input files
     xlsx = pd.ExcelFile(f"{Path().absolute()}/input/{filename}.xlsx")
-    a = pd.read_excel(xlsx, index_col=0, sheet_name='a').to_numpy()
-    b = pd.read_excel(xlsx, index_col=0, sheet_name='b').to_numpy()
-    c = pd.read_excel(xlsx, index_col=0, sheet_name='c').to_numpy()
+    a = pd.read_excel(xlsx, index_col=0, sheet_name="a").to_numpy()
+    b = pd.read_excel(xlsx, index_col=0, sheet_name="b").to_numpy()
+    c = pd.read_excel(xlsx, index_col=0, sheet_name="c").to_numpy()
 
     # Define variables
     model.ITEMS = Set(initialize=range(len(a[0])))
@@ -23,32 +24,32 @@ def four_kp_model(filename):
     # --------------------------------------
 
     def objective1(model):
-        return sum(c[0][i]*model.DecisionVariable[i] for i in model.ITEMS)
+        return sum(c[0][i] * model.DecisionVariable[i] for i in model.ITEMS)
 
     def objective2(model):
-        return sum(c[1][i]*model.DecisionVariable[i] for i in model.ITEMS)
+        return sum(c[1][i] * model.DecisionVariable[i] for i in model.ITEMS)
 
     def objective3(model):
-        return sum(c[2][i]*model.DecisionVariable[i] for i in model.ITEMS)
+        return sum(c[2][i] * model.DecisionVariable[i] for i in model.ITEMS)
 
     def objective4(model):
-        return sum(c[3][i]*model.DecisionVariable[i] for i in model.ITEMS)
+        return sum(c[3][i] * model.DecisionVariable[i] for i in model.ITEMS)
 
     # --------------------------------------
     #   Define the regular constraints
     # --------------------------------------
 
     def constraint1(model):
-        return sum(a[0][i]*model.DecisionVariable[i] for i in model.ITEMS) <= b[0][0]
+        return sum(a[0][i] * model.DecisionVariable[i] for i in model.ITEMS) <= b[0][0]
 
     def constraint2(model):
-        return sum(a[1][i]*model.DecisionVariable[i] for i in model.ITEMS) <= b[1][0]
+        return sum(a[1][i] * model.DecisionVariable[i] for i in model.ITEMS) <= b[1][0]
 
     def constraint3(model):
-        return sum(a[2][i]*model.DecisionVariable[i] for i in model.ITEMS) <= b[2][0]
+        return sum(a[2][i] * model.DecisionVariable[i] for i in model.ITEMS) <= b[2][0]
 
     def constraint4(model):
-        return sum(a[3][i]*model.DecisionVariable[i] for i in model.ITEMS) <= b[3][0]
+        return sum(a[3][i] * model.DecisionVariable[i] for i in model.ITEMS) <= b[3][0]
 
     # --------------------------------------
     #   Add components to the model
@@ -76,11 +77,10 @@ def four_kp_model(filename):
 
 
 def get_non_white_str_list(enumerable):
-    return list(x for x in enumerable if not str.startswith(x, 'Unnamed'))
+    return list(x for x in enumerable if not str.startswith(x, "Unnamed"))
 
 
 def read_excel_model(xlsx_filename, randomness_percentage=[], obj_order=None):
-
     def randomize_value(avg, std_dev_percentage=0):
         is_negative = avg < 0
         if is_negative:
@@ -181,20 +181,20 @@ def read_excel_model(xlsx_filename, randomness_percentage=[], obj_order=None):
     # --------------------------------------
     #   ADD OBJECTIVES AND CONSTRAINTS
     # --------------------------------------
-    cons = [sheet_name for sheet_name in sheets if 'constraint' in sheet_name]
-    obj = [sheet_name for sheet_name in sheets if 'objective' in sheet_name]
+    cons = [sheet_name for sheet_name in sheets if "constraint" in sheet_name]
+    obj = [sheet_name for sheet_name in sheets if "objective" in sheet_name]
 
     if obj_order:  # read objectives in specific order
         # need to rearrange sheet names for objectives
-        obj = [obj[i-1] for i in obj_order]
+        obj = [obj[i - 1] for i in obj_order]
 
         # need also to rearrange the keys/values in model.Datasheets
         temp = {}
         obj_idx = 0
         for sheet_name in sheets:
-            if 'constraint' in sheet_name:
+            if "constraint" in sheet_name:
                 temp[sheet_name] = sheets[sheet_name]
-            if 'objective' in sheet_name:
+            if "objective" in sheet_name:
                 temp[obj[obj_idx]] = sheets[obj[obj_idx]]
                 obj_idx += 1
         model.Datasheets = temp
@@ -217,4 +217,3 @@ def read_excel_model(xlsx_filename, randomness_percentage=[], obj_order=None):
     #     print(model.constraint_list[x].expr)
 
     return model
-
